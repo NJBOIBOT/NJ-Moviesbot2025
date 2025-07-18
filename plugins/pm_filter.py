@@ -34,9 +34,11 @@ SPELL_CHECK = {}
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
     if message.chat.id != SUPPORT_CHAT_ID:
-       link_pattern = r"(https?://|t\.me/|www\.)"
-       if re.search(link_pattern, message.text):
-          return  # 🚫 Skip messages with links
+        import re
+        link_pattern = r"(https?://|t\.me/|www\.)"
+        if re.search(link_pattern, message.text):
+            return  # 🚫 Skip messages with links
+
         settings = await get_settings(message.chat.id)
         chatid = message.chat.id 
         user_id = message.from_user.id if message.from_user else 0
@@ -44,9 +46,20 @@ async def give_filter(client, message):
             try:
                 btn = await pub_is_subscribed(client, message, settings['fsub'])
                 if btn:
-                    btn.append([InlineKeyboardButton("Unmute Me 🔕", callback_data=f"unmuteme#{int(user_id)}")])
-                    await client.restrict_chat_member(chatid, message.from_user.id, ChatPermissions(can_send_messages=False))
-                    await message.reply_photo(photo=random.choice(PICS), caption=f"👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on unmute me button. 😇", reply_markup=InlineKeyboardMarkup(btn), parse_mode=enums.ParseMode.HTML)
+                    btn.append([
+                        InlineKeyboardButton("Unmute Me 🔕", callback_data=f"unmuteme#{int(user_id)}")
+                    ])
+                    await client.restrict_chat_member(
+                        chatid,
+                        message.from_user.id,
+                        ChatPermissions(can_send_messages=False)
+                    )
+                    await message.reply_photo(
+                        photo=random.choice(PICS),
+                        caption=f"👋 Hello {message.from_user.mention},\n\nPlease join the channel then click on unmute me button. 😇",
+                        reply_markup=InlineKeyboardMarkup(btn),
+                        parse_mode=enums.ParseMode.HTML
+                    )
                     return
             except Exception as e:
                 print(e)
