@@ -21,8 +21,8 @@ async def deletemultiplemedia(bot, message):
     else:
         return
 
-    file_id, file_ref = unpack_new_file_id(media.file_id)
-
+    file_id, file_ref, *_ = unpack_new_file_id(media.file_id)
+    
     result = col.delete_one({
         'file_id': file_id,
     })
@@ -64,3 +64,4 @@ async def deletemultiplemedia(bot, message):
                 logger.info('File is successfully deleted from database.')
             else:
                 logger.info('File not found in database.')
+
