@@ -93,10 +93,30 @@ async def pm_text(bot, message):
     content = message.text
     user = message.from_user.first_name
     user_id = message.from_user.id
-    if content.startswith("/") or content.startswith("#"): return  # ignore commands and hashtags
+
+    if content.startswith("/") or content.startswith("#"): 
+        return  # ignore commands and hashtags
+
+    # If PM_SEARCH is off
+    if not PM_SEARCH:
+        btn = [[
+            InlineKeyboardButton("🎬 ʀᴇǫᴜᴇsᴛ ʜᴇʀᴇ", url="https://t.me/+S3aSenYu2cwwMjk1")
+        ]]
+        await message.reply(
+            "<b>ʜᴇʏ ᴅᴜᴅᴇ 😍 ,\n\nʏᴏᴜ ᴄᴀɴ'ᴛ ɢᴇᴛ ᴍᴏᴠɪᴇs ꜰʀᴏᴍ ʜᴇʀᴇ. ʀᴇǫᴜᴇsᴛ ᴏɴ ᴏᴜʀ <a href='http://movierequestgroup_Nj.t.me'>ᴍᴏᴠɪᴇ ɢʀᴏᴜᴘ</a> ᴏʀ ᴄʟɪᴄᴋ ʀᴇǫᴜᴇsᴛ ʜᴇʀᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ👇</b>",
+            reply_markup=InlineKeyboardMarkup(btn),
+            disable_web_page_preview=True
+        )
+        return
+
+    # If PM_SEARCH is on
     if PM_SEARCH == True:
         ai_search = True
-        reply_msg = await bot.send_message(message.from_user.id, f"<b><i>Searching For {content} 🔍</i></b>", reply_to_message_id=message.id)
+        reply_msg = await bot.send_message(
+            message.from_user.id, 
+            f"<b><i>Searching For {content} 🔍</i></b>", 
+            reply_to_message_id=message.id
+        )
         await auto_filter(bot, content, message, reply_msg, ai_search)
     
 @Client.on_callback_query(filters.regex(r"^next"))
@@ -3300,3 +3320,4 @@ async def global_filters(client, message, text=False):
                 break
     else:
         return False
+
