@@ -5,7 +5,6 @@
 import logging, asyncio, os, re, random, pytz, aiohttp, requests, string, json, http.client
 from info import *
 from imdb import Cinemagoer
-from imdb._exceptions import IMDbDataAccessError
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram import enums
 from pyrogram.errors import *
@@ -110,7 +109,8 @@ async def get_poster(query, bulk=False, id=False, file=None):
             year = None
         try:
             movieid = imdb.search_movie(title.lower(), results=10)
-        except IMDbDataAccessError:
+        except Exception as e:
+            logger.exception(f"Exception while searching for movie: {e}")
             return None
         if not movieid:
             return None
@@ -130,7 +130,8 @@ async def get_poster(query, bulk=False, id=False, file=None):
         movieid = query
     try:
         movie = imdb.get_movie(movieid)
-    except IMDbDataAccessError:
+    except Exception as e:
+        logger.exception(f"Exception while getting movie details: {e}")
         return None
     if not movie:
         return None
