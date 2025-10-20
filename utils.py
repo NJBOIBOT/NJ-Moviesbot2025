@@ -1,4 +1,3 @@
-# CACHE_BUSTER_COMMENT
 # Don't Remove Credit @VJ_Botz
 # Subscribe YouTube Channel For Amazing Bot @Tech_VJ
 # Ask Doubt on telegram @KingVJ01
@@ -6,7 +5,7 @@
 import logging, asyncio, os, re, random, pytz, aiohttp, requests, string, json, http.client
 from info import *
 from imdb import Cinemagoer
-from imdb.exceptions import IMDbDataAccessError
+from imdb._exceptions import IMDbDataAccessError
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram import enums
 from pyrogram.errors import *
