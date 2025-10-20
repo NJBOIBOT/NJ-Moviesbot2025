@@ -4,7 +4,8 @@
 
 import logging, asyncio, os, re, random, pytz, aiohttp, requests, string, json, http.client
 from info import *
-from imdb import Cinemagoer 
+from imdb import Cinemagoer
+from imdb._exceptions import IMDbDataAccessError
 from pyrogram.types import Message, InlineKeyboardButton, InlineKeyboardMarkup
 from pyrogram import enums
 from pyrogram.errors import *
@@ -107,7 +108,10 @@ async def get_poster(query, bulk=False, id=False, file=None):
                 year = list_to_str(year[:1]) 
         else:
             year = None
-        movieid = imdb.search_movie(title.lower(), results=10)
+        try:
+            movieid = imdb.search_movie(title.lower(), results=10)
+        except IMDbDataAccessError:
+            return None
         if not movieid:
             return None
         if year:
@@ -124,7 +128,10 @@ async def get_poster(query, bulk=False, id=False, file=None):
         movieid = movieid[0].movieID
     else:
         movieid = query
-    movie = imdb.get_movie(movieid)
+    try:
+        movie = imdb.get_movie(movieid)
+    except IMDbDataAccessError:
+        return None
     if not movie:
         return None
     if movie.get("original air date"):
