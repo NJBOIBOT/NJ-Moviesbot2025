@@ -21,21 +21,21 @@ async def referal_add_user(user_id, ref_user_id):
         return True
     except DuplicateKeyError:
         return False
-    
+
 
 async def get_referal_all_users(user_id):
     user_db = mydb[str(user_id)]
     return user_db.find()
-    
+
 async def get_referal_users_count(user_id):
     user_db = mydb[str(user_id)]
     count = user_db.count_documents({})
     return count
-    
+
 
 async def delete_all_referal_users(user_id):
     user_db = mydb[str(user_id)]
-    user_db.delete_many({}) 
+    user_db.delete_many({})
 
 default_setgs = {
     'button': BUTTON_MODE,
@@ -58,7 +58,7 @@ default_setgs = {
 
 
 class Database:
-    
+
     def __init__(self, uri, database_name):
         self._client = motor.motor_asyncio.AsyncIOMotorClient(uri)
         self.db = self._client[database_name]
@@ -66,6 +66,7 @@ class Database:
         self.grp = self.db.groups
         self.users = self.db.uersz
         self.bot = self.db.clone_bots
+        self.verify = self.db.verify
 
 
     def new_user(self, id, name):
@@ -93,15 +94,15 @@ class Database:
             ),
             settings=default_setgs
         )
-    
+
     async def add_user(self, id, name):
         user = self.new_user(id, name)
         await self.col.insert_one(user)
-    
+
     async def is_user_exist(self, id):
         user = await self.col.find_one({'id':int(id)})
         return bool(user)
-    
+
     async def total_users_count(self):
         count = await self.col.count_documents({})
         return count
@@ -128,27 +129,27 @@ class Database:
     async def get_clone(self, user_id):
         clone_data = await self.bot.find_one({"user_id": user_id})
         return clone_data
-            
+
     async def update_clone(self, user_id, user_data):
         await self.bot.update_one({"user_id": user_id}, {"$set": user_data}, upsert=True)
 
     async def get_bot(self, bot_id):
         bot_data = await self.bot.find_one({"bot_id": bot_id})
         return bot_data
-            
+
     async def update_bot(self, bot_id, bot_data):
         await self.bot.update_one({"bot_id": bot_id}, {"$set": bot_data}, upsert=True)
-    
+
     async def get_all_bots(self):
         return self.bot.find({})
-        
+
     async def remove_ban(self, id):
         ban_status = dict(
             is_banned=False,
             ban_reason=''
         )
         await self.col.update_one({'id': id}, {'$set': {'ban_status': ban_status}})
-    
+
     async def ban_user(self, user_id, ban_reason="No Reason"):
         ban_status = dict(
             is_banned=True,
@@ -168,7 +169,7 @@ class Database:
 
     async def get_all_users(self):
         return self.col.find({})
-    
+
 
     async def delete_user(self, user_id):
         await self.col.delete_many({'id': int(user_id)})
@@ -180,18 +181,18 @@ class Database:
         b_chats = [chat['id'] async for chat in chats]
         b_users = [user['id'] async for user in users]
         return b_users, b_chats
-    
+
 
 
     async def add_chat(self, chat, title):
         chat = self.new_group(chat, title)
         await self.grp.insert_one(chat)
-    
+
 
     async def get_chat(self, chat):
         chat = await self.grp.find_one({'id':int(chat)})
         return False if not chat else chat.get('chat_status')
-    
+
 
     async def re_enable_chat(self, id):
         chat_status=dict(
@@ -199,17 +200,17 @@ class Database:
             reason="",
             )
         await self.grp.update_one({'id': int(id)}, {'$set': {'chat_status': chat_status}})
-        
+
     async def update_settings(self, id, settings):
         await self.grp.update_one({'id': int(id)}, {'$set': {'settings': settings}})
-        
-    
+
+
     async def get_settings(self, id):
         chat = await self.grp.find_one({'id':int(id)})
         if chat:
             return chat.get('settings', default_setgs)
         return default_setgs
-    
+
 
     async def disable_chat(self, chat, reason="No Reason"):
         chat_status=dict(
@@ -217,12 +218,12 @@ class Database:
             reason=reason,
             )
         await self.grp.update_one({'id': int(chat)}, {'$set': {'chat_status': chat_status}})
-    
+
 
     async def total_chat_count(self):
         count = await self.grp.count_documents({})
         return count
-    
+
 
     async def get_all_chats(self):
         return self.grp.find({})
@@ -234,7 +235,7 @@ class Database:
     async def get_user(self, user_id):
         user_data = await self.users.find_one({"id": user_id})
         return user_data
-            
+
     async def update_user(self, user_data):
         await self.users.update_one({"id": user_data["id"]}, {"$set": user_data}, upsert=True)
 
@@ -250,10 +251,10 @@ class Database:
             else:
                 await self.users.update_one({"id": user_id}, {"$set": {"expiry_time": None}})
         return False
-    
+
     async def check_remaining_uasge(self, userid):
         user_id = userid
-        user_data = await self.get_user(user_id)        
+        user_data = await self.get_user(user_id)
         expiry_time = user_data.get("expiry_time")
         # Calculate remaining time
         remaining_time = expiry_time - datetime.datetime.now()
@@ -265,14 +266,14 @@ class Database:
             return user_data.get("has_free_trial", False)
         return False
 
-    async def give_free_trail(self, userid):        
+    async def give_free_trail(self, userid):
         user_id = userid
-        seconds = 5*60         
+        seconds = 5*60
         expiry_time = datetime.datetime.now() + datetime.timedelta(seconds=seconds)
         user_data = {"id": user_id, "expiry_time": expiry_time, "has_free_trial": True}
         await self.users.update_one({"id": user_id}, {"$set": user_data}, upsert=True)
-    
-    
+
+
     async def all_premium_users(self):
         count = await self.users.count_documents({
         "expiry_time": {"$gt": datetime.datetime.now()}
@@ -305,7 +306,16 @@ class Database:
 
     async def get_save(self, id):
         user = await self.col.find_one({'id': int(id)})
-        return user.get('save', False) 
-    
+        return user.get('save', False)
+
+    async def add_verify_request(self, user_id, file_id):
+        await self.verify.update_one({"_id": user_id}, {"$set": {"file_id": file_id}}, upsert=True)
+
+    async def get_verify_request(self, user_id):
+        user = await self.verify.find_one({'_id': user_id})
+        return user.get('file_id', None) if user else None
+
+    async def delete_verify_request(self, user_id):
+        await self.verify.delete_one({'_id': user_id})
 
 db = Database(USER_DB_URI, DATABASE_NAME)
