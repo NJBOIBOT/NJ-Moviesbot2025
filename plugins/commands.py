@@ -368,36 +368,38 @@ async def start(client, message):
                 text += "<b>Sᴇᴀʀᴄʜ ʏᴏᴜʀ ᴍᴏᴠɪᴇ/sᴇʀɪᴇs ᴀɢᴀɪɴ ɪɴ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ 📂📥\n\n♻️ ꜱᴇɴᴅ /ᴘʟᴀɴ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ💸</b>"           
             await message.reply_text(text=text.format(message.from_user.mention), protect_content=True)
             await verify_user(client, userid, token)
-            file_id = await db.get_verify_request(message.from_user.id)
-            if file_id:
+            verify_request = await db.get_verify_request(message.from_user.id)
+            if verify_request is not None:
+                data = verify_request["file_id"]
+                pre, file_id = data.split('_', 1)
                 files_ = await get_file_details(file_id)
-                if files_:
-                    files = files_
-                    title = files["file_name"]
-                    size=get_size(files["file_size"])
-                    f_caption=files["caption"]
-                    if CUSTOM_FILE_CAPTION:
-                        try:
-                            f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
-                        except:
-                            f_caption=f_caption
-                    if f_caption is None:
-                        f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
-
-                    if STREAM_MODE == True:
-                        button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
-                        reply_markup=InlineKeyboardMarkup(button)
-                    else:
-                        reply_markup = None
-
-                    await client.send_cached_media(
-                        chat_id=message.from_user.id,
-                        file_id=file_id,
-                        caption=f_caption,
-                        protect_content=True,
-                        reply_markup=reply_markup
-                    )
-                    await db.delete_verify_request(message.from_user.id)
+                if not files_:
+                    return
+                files = files_
+                title = files["file_name"]
+                size=get_size(files["file_size"])
+                f_caption=files["caption"]
+                if CUSTOM_FILE_CAPTION:
+                    try:
+                        f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
+                    except:
+                        f_caption=f_caption
+                if f_caption is None:
+                    f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
+                if STREAM_MODE == True:
+                    button = [[InlineKeyboardButton('sᴛʀᴇᴀᴍ ᴀɴᴅ ᴅᴏᴡɴʟᴏᴀᴅ', callback_data=f'generate_stream_link:{file_id}')]]
+                    reply_markup=InlineKeyboardMarkup(button)
+                else:
+                    reply_markup = None
+                await client.send_cached_media(
+                    chat_id=message.from_user.id,
+                    file_id=file_id,
+                    caption=f_caption,
+                    protect_content=True,
+                    reply_markup=reply_markup
+                )
+                await db.delete_verify_request(message.from_user.id)
+            return
         else:
             return await message.reply_text(text="<b>ɪɴᴠᴀʟɪᴅ ʟɪɴᴋ ᴏʀ ᴇxᴘɪʀᴇᴅ ʟɪɴᴋ</b>", protect_content=True)
             
@@ -460,6 +462,7 @@ async def start(client, message):
                 f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files1['file_name'].split()))}"
             if not await db.has_premium_access(message.from_user.id):
                 if not await check_verification(client, message.from_user.id) and VERIFY == True:
+                    await db.add_verify_request(message.from_user.id, data)
                     btn = [[
                         InlineKeyboardButton("ᴠᴇʀɪғʏ", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
                     ],[
@@ -468,7 +471,6 @@ async def start(client, message):
                     text = "<b>ʜᴇʏ {} 👋,\n\nʏᴏᴜ ᴀʀᴇ ɴᴏᴛ ᴠᴇʀɪғɪᴇᴅ ᴛᴏᴅᴀʏ, ᴘʟᴇᴀꜱᴇ ᴄʟɪᴄᴋ ᴏɴ ᴠᴇʀɪғʏ & ɢᴇᴛ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇꜱꜱ ғᴏʀ ᴛᴏᴅᴀʏ</b>"
                     if PREMIUM_AND_REFERAL_MODE == True:
                         text += "<b>ɪғ ʏᴏᴜ ᴡᴀɴᴛ ᴅɪʀᴇᴄᴛ ғɪʟᴇꜱ ᴡɪᴛʜᴏᴜᴛ ᴀɴʏ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴꜱ ᴛʜᴇɴ ʙᴜʏ ʙᴏᴛ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ ☺️\n\n💶 ꜱᴇɴᴅ /plan ᴛᴏ ʙᴜʏ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ</b>"
-                    await db.add_verify_request(message.from_user.id, file_id)
                     await message.reply_text(
                         text=text.format(message.from_user.mention),
                         protect_content=True,
@@ -518,6 +520,7 @@ async def start(client, message):
         try:
             if not await db.has_premium_access(message.from_user.id):
                 if not await check_verification(client, message.from_user.id) and VERIFY == True:
+                    await db.add_verify_request(message.from_user.id, data)
                     btn = [[
                         InlineKeyboardButton("ᴠᴇʀɪғʏ", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
                     ],[
@@ -576,6 +579,7 @@ async def start(client, message):
         f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
     if not await db.has_premium_access(message.from_user.id):
         if not await check_verification(client, message.from_user.id) and VERIFY == True:
+            await db.add_verify_request(message.from_user.id, data)
             btn = [[
                 InlineKeyboardButton("ᴠᴇʀɪғʏ", url=await get_token(client, message.from_user.id, f"https://telegram.me/{temp.U_NAME}?start="))
             ],[
