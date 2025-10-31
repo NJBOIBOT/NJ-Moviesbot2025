@@ -15,6 +15,7 @@ from utils import get_settings, pub_is_subscribed, get_size, is_subscribed, save
 from database.connections_mdb import active_connection
 from urllib.parse import quote_plus
 from TechVJ.util.file_properties import get_name, get_hash, get_media_file_size
+from utils import get_audio_info
 logger = logging.getLogger(__name__)
 
 BATCH_FILES = {}
@@ -428,6 +429,12 @@ async def start(client, message):
                     f_caption=f_caption
             if f_caption is None:
                 f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files1['file_name'].split()))}"
+            try:
+                audio_info = await get_audio_info(client, file_id)
+                if audio_info:
+                    f_caption += f"\n\n🔊 <b>Audio :</b> {audio_info}"
+            except Exception as e:
+                logger.exception(e)
             if not await db.has_premium_access(message.from_user.id):
                 if not await check_verification(client, message.from_user.id) and VERIFY == True:
                     btn = [[
@@ -543,6 +550,12 @@ async def start(client, message):
             f_caption=f_caption
     if f_caption is None:
         f_caption = f"{' '.join(filter(lambda x: not x.startswith('[') and not x.startswith('@'), files['file_name'].split()))}"
+    try:
+        audio_info = await get_audio_info(client, file_id)
+        if audio_info:
+            f_caption += f"\n\n🔊 <b>Audio :</b> {audio_info}"
+    except Exception as e:
+        logger.exception(e)
     if not await db.has_premium_access(message.from_user.id):
         if not await check_verification(client, message.from_user.id) and VERIFY == True:
             btn = [[
