@@ -367,7 +367,7 @@ async def start(client, message):
             text = "<b>ʜᴇʏ {} 👋,\n\nʏᴏᴜ ʜᴀᴠᴇ ᴄᴏᴍᴘʟᴇᴛᴇᴅ ᴛʜᴇ ᴠᴇʀɪꜰɪᴄᴀᴛɪᴏɴ...\n\nɴᴏᴡ ʏᴏᴜ ʜᴀᴠᴇ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇss ᴛɪʟʟ ᴛᴏᴅᴀʏ ɴᴏᴡ ᴇɴᴊᴏʏ\n\n</b>"
             if PREMIUM_AND_REFERAL_MODE == True:
                 text += "<b>Sᴇᴀʀᴄʜ ʏᴏᴜʀ ᴍᴏᴠɪᴇ/sᴇʀɪᴇs ᴀɢᴀɪɴ ɪɴ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ 📂📥\n\n♻️ ꜱᴇɴᴅ /ᴘʟᴀɴ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ💸</b>"           
-            await message.reply_text(text=text.format(message.from_user.mention), protect_content=True)
+            await message.reply_photo(photo="https://telegra.ph/file/20a69430bd7da7252e346-61bc69a8ecf529b481.jpg", caption=text.format(message.from_user.mention), protect_content=True)
             await verify_user(client, userid, token)
         else:
             return await message.reply_text(text="<b>ɪɴᴠᴀʟɪᴅ ʟɪɴᴋ ᴏʀ ᴇxᴘɪʀᴇᴅ ʟɪɴᴋ</b>", protect_content=True)

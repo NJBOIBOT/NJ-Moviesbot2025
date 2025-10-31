@@ -33,12 +33,10 @@ SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
-    if message.from_user is None:
-        return
     if message.chat.id != SUPPORT_CHAT_ID:
         import re
-        link_pattern = r"(https?://|http://|www\.|t\.me/|[a-zA-Z0-9_-]+\.[a-z]{2,})"
-        if re.search(link_pattern, message.text, re.IGNORECASE):
+        link_pattern = r"(https?://|t\.me/|www\.)"
+        if re.search(link_pattern, message.text):
             return  # 🚫 Skip messages with links
 
         settings = await get_settings(message.chat.id)
@@ -3322,5 +3320,4 @@ async def global_filters(client, message, text=False):
                 break
     else:
         return False
-
 
