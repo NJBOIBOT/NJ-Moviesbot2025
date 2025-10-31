@@ -33,6 +33,8 @@ SPELL_CHECK = {}
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client, message):
+    if not message.from_user:
+        return
     if message.chat.id != SUPPORT_CHAT_ID:
         import re
         link_pattern = r"(https?://|t\.me/|www\.)"
