@@ -372,6 +372,7 @@ async def start(client, message):
                 text += "<b>Sᴇᴀʀᴄʜ ʏᴏᴜʀ ᴍᴏᴠɪᴇ/sᴇʀɪᴇs ᴀɢᴀɪɴ ɪɴ ɢʀᴏᴜᴘ ᴀɴᴅ ᴇɴᴊᴏʏ 📂📥\n\n♻️ ꜱᴇɴᴅ /ᴘʟᴀɴ ᴛᴏ ʙᴜʏ ᴘʀᴇᴍɪᴜᴍ ꜱᴜʙꜱᴄʀɪᴘᴛɪᴏɴ💸</b>"           
             await client.send_photo(chat_id=message.chat.id, photo="https://telegra.ph/file/20a69430bd7da7252e346-61bc69a8ecf529b481.jpg", caption=text.format(message.from_user.mention), protect_content=True)
             await verify_user(client, userid, token)
+            return
         else:
             return await message.reply_text(text="<b>ɪɴᴠᴀʟɪᴅ ʟɪɴᴋ ᴏʀ ᴇxᴘɪʀᴇᴅ ʟɪɴᴋ</b>", protect_content=True)
             
