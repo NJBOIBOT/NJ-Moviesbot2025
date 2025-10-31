@@ -757,12 +757,25 @@ async def get_audio_info(client, file_id):
 
         media_info = MediaInfo.parse(temp_file_path)
         audio_languages = []
+        language_map = {
+            'hi': 'Hindi',
+            'ta': 'Tamil',
+            'te': 'Telugu',
+            'ml': 'Malayalam',
+            'kn': 'Kannada',
+            'en': 'English',
+        }
         for track in media_info.tracks:
             if track.track_type == 'Audio':
+                lang_code = None
                 if hasattr(track, 'language') and track.language:
-                    audio_languages.append(track.language)
+                    lang_code = track.language
                 elif hasattr(track, 'title') and track.title:
-                    audio_languages.append(track.title)
+                    lang_code = track.title
+
+                if lang_code:
+                    full_lang = language_map.get(lang_code.lower(), lang_code)
+                    audio_languages.append(full_lang)
 
         if audio_languages:
             return ', '.join(audio_languages)
